@@ -31,8 +31,9 @@ if not os.path.exists(os.path.join(outdir, "bin")):
 for item in info:
     if (fnmatch(item[2], '/usr/*') or fnmatch(item[2], f'/{MINGW_ARCH}/*')
     or fnmatch(item[2], '*\\usr\\*')) or fnmatch(item[2], f'*\\{MINGW_ARCH}\\*'):
-        os.system(f'cp "{item[2]}" "{os.path.join(outdir, "bin", item[0])}"')
-        dependencies.add(item[0])
+        if item[0] not in dependencies:
+            os.system(f'cp "{item[2]}" "{os.path.join(outdir, "bin", item[0])}"')
+            dependencies.add(item[0])
 os.system(f'cp "{pathed(path)}" "{os.path.join(outdir, "bin", os.path.basename(path))}"')
 
 if ("libgtk-3-0.dll" in dependencies):
