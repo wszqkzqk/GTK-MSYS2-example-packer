@@ -26,7 +26,7 @@ class GtkPacker():
         else:
             return False
 
-    def copy_dyna_dep(self):
+    def copy_bin_file(self):
         info = [i.split() for i in os.popen(f'ntldd -R "{self.exe_file_path}"')]
         bin_path = os.path.join(self.outdir, "bin")
         if not os.path.exists(bin_path):
@@ -38,23 +38,23 @@ class GtkPacker():
                     self.dependencies.add(item[0])
         os.system(f'cp "{self.exe_file_path}" "{os.path.join(bin_path, os.path.basename(self.exe_file_path))}"')
 
-    def copy_source_file(self):
-        copy_source_file_dic = {
+    def copy_resource_file(self):
+        copy_resource_file_dic = {
             os.path.join(self.mingw_path, "share", "themes", "default", "gtk-3.0"): os.path.join(self.outdir, "share", "themes", "default"),
             os.path.join(self.mingw_path, "share", "themes", "emacs", "gtk-3.0"): os.path.join(self.outdir, "share", "themes", "emacs"),
             os.path.join(self.mingw_path, "share", "glib-2.0", "schemas"): os.path.join(self.outdir, "share", "glib-2.0"),
             os.path.join(self.mingw_path, "share", "icons"): os.path.join(self.outdir, "share"),
             os.path.join(self.mingw_path, "lib", "gdk-pixbuf-2.0"): os.path.join(self.outdir, "lib"),
         }
-        for source, target in copy_source_file_dic.items():
+        for source, target in copy_resource_file_dic.items():
             if not os.path.exists(os.path.join(self.outdir, target)):
                 os.makedirs(os.path.join(self.outdir, target))
             os.system(f'cp -r "{source}" "{target}"')
 
     def run(self):
-        self.copy_dyna_dep()
+        self.copy_bin_file()
         if ("libgtk-3-0.dll" in self.dependencies):
-            self.copy_source_file()
+            self.copy_resource_file()
 
 if __name__ == "__main__":
     from sys import argv
