@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# MSYS2下的GTK3程序打包器
+# MSYS2下的GTK3程序打包器（简单实现）
 # 依赖ntldd提供动态链接关系
 
 from sys import argv
