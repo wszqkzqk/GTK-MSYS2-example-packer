@@ -21,8 +21,8 @@ class GtkPacker():
             return path
 
     def is_msys2_dep(self, dep_path):
-        if (fnmatch(dep_path, '/usr/*') or fnmatch(dep_path, f'/{self.mingw_arch}/*')
-        or fnmatch(dep_path, '*\\usr\\*')) or fnmatch(dep_path, f'*\\{self.mingw_arch}\\*'):
+        if (fnmatch(dep_path, "/usr/*") or fnmatch(dep_path, f"/{self.mingw_arch}/*")
+        or fnmatch(dep_path, "*\\usr\\*")) or fnmatch(dep_path, f"*\\{self.mingw_arch}\\*"):
             return True
         else:
             return False
@@ -69,10 +69,10 @@ if __name__ == "__main__":
                     "GtkPacker.py -h(--help)    ----查看帮助")
             os._exit(0)
         else:
-            outdir = input('请输入需要将目标文件复制到的文件夹地址:\n')
+            outdir = input("请输入需要将目标文件复制到的文件夹地址:\n")
     elif len(argv) == 1:
-        path = input('请输入文件地址:\n')
-        outdir = input('请输入需要将目标文件复制到的文件夹地址:\n')
+        path = input("请输入文件地址:\n")
+        outdir = input("请输入需要将目标文件复制到的文件夹地址:\n")
 
     packer = GtkPacker("ucrt64", "D:\\msys64\\", path, outdir)
     packer.run()
