@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from ast import arg
 from fnmatch import fnmatch
 import os
 
@@ -7,7 +6,6 @@ class GtkPacker():
     def __init__(self, mingw_arch, msys2_path, exe_file_path, outdir):
         self.dependencies = set()
         self.mingw_arch = mingw_arch
-        self.msys2_path = msys2_path
         self.mingw_path = os.path.join(msys2_path, mingw_arch)
         self.exe_file_path = self.clean_path(exe_file_path)
         self.outdir = outdir
