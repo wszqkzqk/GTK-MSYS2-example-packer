@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# 依赖ntldd提供动态链接关系
+
 from fnmatch import fnmatch
 import os
 
