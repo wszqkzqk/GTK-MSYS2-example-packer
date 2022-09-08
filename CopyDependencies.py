@@ -37,18 +37,14 @@ for item in info:
 os.system(f'cp "{pathed(path)}" "{os.path.join(outdir, "bin", os.path.basename(path))}"')
 
 if ("libgtk-3-0.dll" in dependencies):
-    share_file_path = (
-        theme_path_default := os.path.join(outdir, "share", "themes", "default"),
-        theme_path_emacs := os.path.join(outdir, "share", "themes", "emacs"),
-        schemas_path := os.path.join(outdir, "share", "glib-2.0"),
-        icon_path := os.path.join(outdir, "share"),
-        pixbuf_path := os.path.join(outdir, "lib"),
-        )
-    for i in share_file_path:
-        if not os.path.exists(os.path.join(outdir, i)):
-            os.makedirs(os.path.join(outdir, i))
-    os.system(f'cp -r "{os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "themes", "default", "gtk-3.0")}" "{theme_path_default}"')
-    os.system(f'cp -r "{os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "themes", "emacs", "gtk-3.0")}" "{theme_path_emacs}"')
-    os.system(f'cp -r "{os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "glib-2.0", "schemas")}" "{schemas_path}"')
-    os.system(f'cp -r "{os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "icons")}" "{icon_path}"')
-    os.system(f'cp -r "{os.path.join(MSYS2_PATH, MINGW_ARCH, "lib", "gdk-pixbuf-2.0")}" "{pixbuf_path}"')
+    copy_share_file_dic = {
+        os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "themes", "default", "gtk-3.0"): os.path.join(outdir, "share", "themes", "default"),
+        os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "themes", "emacs", "gtk-3.0"): os.path.join(outdir, "share", "themes", "emacs"),
+        os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "glib-2.0", "schemas"): os.path.join(outdir, "share", "glib-2.0"),
+        os.path.join(MSYS2_PATH, MINGW_ARCH, "share", "icons"): os.path.join(outdir, "share"),
+        os.path.join(MSYS2_PATH, MINGW_ARCH, "lib", "gdk-pixbuf-2.0"): os.path.join(outdir, "lib"),
+    }
+    for source, target in copy_share_file_dic.items():
+        if not os.path.exists(os.path.join(outdir, target)):
+            os.makedirs(os.path.join(outdir, target))
+        os.system(f'cp -r "{source}" "{target}"')
