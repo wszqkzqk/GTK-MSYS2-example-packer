@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# MSYS2下的GTK3程序打包器
 # 依赖ntldd提供动态链接关系
 
 from fnmatch import fnmatch
