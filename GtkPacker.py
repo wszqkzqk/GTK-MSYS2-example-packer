@@ -28,7 +28,7 @@ class GtkPacker():
             return False
 
     def copy_bin_file(self):
-        info = [i.split() for i in os.popen(f'ntldd -R "{self.exe_file_path}"')]
+        info = (i.split() for i in os.popen(f'ntldd -R "{self.exe_file_path}"'))
         bin_path = os.path.join(self.outdir, "bin")
         if not os.path.exists(bin_path):
             os.makedirs(bin_path)
