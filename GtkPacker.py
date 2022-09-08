@@ -63,10 +63,10 @@ if __name__ == "__main__":
         outdir = argv[2]
     elif len(argv) == 2:
         if argv[1] in {"--help", "-h"}:
-            print("""帮助：
-GtkPacker.py [待打包文件路径] [需打包到的目标路径]
-GtkPacker.py -h(--help) ---- 查看帮助
-"""     )
+            print(  "帮助：\n"
+                    "GtkPacker.py [待打包文件路径] [需打包到的目标路径]\n"
+                    "GtkPacker.py -h(--help)    ----查看帮助")
+            os._exit(0)
         else:
             outdir = input('请输入需要将目标文件复制到的文件夹地址:\n')
     elif len(argv) == 1:
