@@ -74,5 +74,5 @@ if __name__ == "__main__":
         path = input("请输入文件地址:\n")
         outdir = input("请输入需要将目标文件复制到的文件夹地址:\n")
 
-    packer = GtkPacker("ucrt64", "D:\\msys64\\", path, outdir)
+    packer = GtkPacker("ucrt64", "D:\\msys64", path, outdir)
     packer.run()
