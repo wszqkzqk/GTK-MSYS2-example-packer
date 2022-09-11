@@ -11,16 +11,22 @@ class GtkPacker():
         self.dependencies = set()
         self.mingw_arch = mingw_arch
         self.mingw_path = os.path.join(msys2_path, mingw_arch)
-        self.exe_file_path = self.clean_path(exe_file_path)
-        self.outdir = outdir
         self.quote_regex = re.compile(r"""(".*")|('.*')""")
         self.msys2_dep_regex = re.compile(r".*(/|\\)"f"(usr|{mingw_arch})"r"(/|\\).*")  # Python会自动拼接仅以空白符号分隔的字符串
+        self.exe_file_path = self.clean_path(exe_file_path)
+        self.outdir = outdir
 
     def clean_path(self, path):
         if self.quote_regex.match(path):
             return path[1:-1]
         else:
             return path
+    
+    def copy_operation(self, resource, target):
+        if not os.system(f'cp -r "{resource}" "{target}"'):
+            print(f"Successfully copied '{os.path.basename(resource)}'")
+        else:
+            print(f"Warning: copying process failed when copying '{os.path.basename(resource)}'")
 
     def copy_bin_file(self):
         info = (i.split() for i in os.popen(f'ntldd -R "{self.exe_file_path}"'))
@@ -30,9 +36,9 @@ class GtkPacker():
         for item in info:
             if self.msys2_dep_regex.match(item[2]):
                 if item[0] not in self.dependencies:
-                    os.system(f'cp "{item[2]}" "{os.path.join(bin_path, item[0])}"')
+                    self.copy_operation(item[2], os.path.join(bin_path, item[0]))
                     self.dependencies.add(item[0])
-        os.system(f'cp "{self.exe_file_path}" "{os.path.join(bin_path, os.path.basename(self.exe_file_path))}"')
+        self.copy_operation(self.exe_file_path, os.path.join(bin_path, os.path.basename(self.exe_file_path)))
 
     def copy_resource_file(self):
         copy_resource_file_dic = {
@@ -42,10 +48,10 @@ class GtkPacker():
             os.path.join(self.mingw_path, "share", "icons"): os.path.join(self.outdir, "share"),
             os.path.join(self.mingw_path, "lib", "gdk-pixbuf-2.0"): os.path.join(self.outdir, "lib"),
         }
-        for source, target in copy_resource_file_dic.items():
+        for resource, target in copy_resource_file_dic.items():
             if not os.path.exists(os.path.join(self.outdir, target)):
                 os.makedirs(os.path.join(self.outdir, target))
-            os.system(f'cp -r "{source}" "{target}"')
+            self.copy_operation(resource, target)
 
     def run(self):
         self.copy_bin_file()
