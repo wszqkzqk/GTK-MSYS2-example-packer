@@ -4,11 +4,11 @@
 # 依赖ntldd提供动态链接关系
 
 from sys import argv
-from fnmatch import fnmatch
+import re
 import os
 
 MINGW_ARCH = "ucrt64"
-MSYS2_PATH = "D:\\msys64\\"
+MSYS2_PATH = "D:\\msys64"
 
 if len(argv) == 3:
     path = argv[1]
@@ -27,11 +27,11 @@ def pathed(path):
 
 info = [i.split() for i in os.popen(f'ntldd -R "{pathed(path)}"')]
 dependencies = set()
+regex = re.compile(f".*(/|\\\\)(usr|{MINGW_ARCH})(/|\\\\).*")
 if not os.path.exists(os.path.join(outdir, "bin")):
     os.makedirs(os.path.join(outdir, "bin"))
 for item in info:
-    if (fnmatch(item[2], '/usr/*') or fnmatch(item[2], f'/{MINGW_ARCH}/*')
-    or fnmatch(item[2], '*\\usr\\*')) or fnmatch(item[2], f'*\\{MINGW_ARCH}\\*'):
+    if regex.match(item[2]):
         if item[0] not in dependencies:
             os.system(f'cp "{item[2]}" "{os.path.join(outdir, "bin", item[0])}"')
             dependencies.add(item[0])
