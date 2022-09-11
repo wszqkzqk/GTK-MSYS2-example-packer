@@ -26,7 +26,7 @@ class GtkPacker():
         if not os.system(f'cp -r "{resource}" "{target}"'):
             print(f"Successfully copied '{os.path.basename(resource)}'")
         else:
-            print(f"Warning: copying process failed when copying '{os.path.basename(resource)}'")
+            print(f"Warning: failed to copy '{os.path.basename(resource)}'")
 
     def copy_bin_file(self):
         info = (i.split() for i in os.popen(f'ntldd -R "{self.exe_file_path}"'))
