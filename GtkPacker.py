@@ -3,7 +3,7 @@
 # MSYS2下的GTK3程序打包器（面向对象实现）
 # 依赖ntldd提供动态链接关系
 
-from fnmatch import fnmatch
+import re
 import os
 
 class GtkPacker():
@@ -13,6 +13,7 @@ class GtkPacker():
         self.mingw_path = os.path.join(msys2_path, mingw_arch)
         self.exe_file_path = self.clean_path(exe_file_path)
         self.outdir = outdir
+        self.msys2_dep_regex = re.compile(f".*(/|\\\\)(usr|{mingw_arch})(/|\\\\).*")
 
     def clean_path(self, path):
         if ((path[0] == "'") or (path[0] == '"')) and ((path[-1] == "'") or (path[-1] == '"')):
@@ -20,20 +21,13 @@ class GtkPacker():
         else:
             return path
 
-    def is_msys2_dep(self, dep_path):
-        if (fnmatch(dep_path, "/usr/*") or fnmatch(dep_path, f"/{self.mingw_arch}/*")
-        or fnmatch(dep_path, "*\\usr\\*")) or fnmatch(dep_path, f"*\\{self.mingw_arch}\\*"):
-            return True
-        else:
-            return False
-
     def copy_bin_file(self):
         info = (i.split() for i in os.popen(f'ntldd -R "{self.exe_file_path}"'))
         bin_path = os.path.join(self.outdir, "bin")
         if not os.path.exists(bin_path):
             os.makedirs(bin_path)
         for item in info:
-            if self.is_msys2_dep(item[2]):
+            if self.msys2_dep_regex.match(item[2]):
                 if item[0] not in self.dependencies:
                     os.system(f'cp "{item[2]}" "{os.path.join(bin_path, item[0])}"')
                     self.dependencies.add(item[0])
