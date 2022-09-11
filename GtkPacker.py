@@ -13,7 +13,8 @@ class GtkPacker():
         self.mingw_path = os.path.join(msys2_path, mingw_arch)
         self.exe_file_path = self.clean_path(exe_file_path)
         self.outdir = outdir
-        self.msys2_dep_regex = re.compile(f".*(/|\\\\)(usr|{mingw_arch})(/|\\\\).*")
+        # 既想使用原意字符串又需要槽传递值的一个办法，Python会自动拼接只以空白符号相隔的字符串
+        self.msys2_dep_regex = re.compile(r".*(/|\\)"f"(usr|{mingw_arch})"r"(/|\\).*")
 
     def clean_path(self, path):
         if ((path[0] == "'") or (path[0] == '"')) and ((path[-1] == "'") or (path[-1] == '"')):
