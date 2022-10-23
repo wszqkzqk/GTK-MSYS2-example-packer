@@ -110,7 +110,7 @@ public class GtkPacker : Object {
     }
 }
 
-void main(string[] args) {
+int main(string[] args) {
     string file_path;
     string outdir;
 
@@ -126,7 +126,7 @@ void main(string[] args) {
                     "GTK3程序打包器使用帮助：",
                     "GtkPacker.exe [待打包文件路径] [需打包到的目标路径]",
                     "GtkPacker.exe -h(--help)    ----查看帮助");
-            return;
+            return 0;
         } else {
             file_path = args[1];
             print("请输入需要将目标文件复制到的文件夹地址:\n");
@@ -137,9 +137,11 @@ void main(string[] args) {
         outdir = args[2];
     } else {
         print("错误！参数过多！\n");
-        return;
+        return 1;
     }
 
     var packer = new GtkPacker(file_path, outdir);
     packer.run();
+
+    return 0;
 }
