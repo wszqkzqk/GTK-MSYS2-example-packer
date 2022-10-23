@@ -1,6 +1,6 @@
 #!/usr/bin/env -S vala --pkg=gee-0.8 --pkg=gio-2.0 -X -O2 -X -march=native -X -pipe
 
-// 在Windows下打包MSYS2中的GTK3程序
+// 在Windows下打包MSYS2中的GTK程序
 // LGPL v2.1
 
 public class GtkPacker : Object {
@@ -123,7 +123,7 @@ int main(string[] args) {
     } else if (args.length == 2) {
         if (args[1] == "-h" || args[1] == "--help") {
             print(  "%s\n%s\n%s\n",
-                    "GTK3程序打包器使用帮助：",
+                    "GTK程序打包器使用帮助：",
                     "GtkPacker.exe [待打包文件路径] [需打包到的目标路径]",
                     "GtkPacker.exe -h(--help)    ----查看帮助");
             return 0;
