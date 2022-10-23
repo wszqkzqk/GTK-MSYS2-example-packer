@@ -1,6 +1,7 @@
 #!/usr/bin/env -S vala --pkg=gee-0.8 --pkg=gio-2.0 -X -O2 -X -march=native -X -pipe
 
 // 在Windows下打包MSYS2中的GTK3程序
+// LGPL v2.1
 
 public class GtkPacker : Object {
     string file_path;
