@@ -104,7 +104,7 @@ public class GtkPacker : Object {
 
     public void run() {
         this.copy_bin_files();
-        if (("libgtk-3-0.dll" in this.dependencies) || ("libgtk-4-1.dll" in this.dependencies)) {
+        if ("libgtk-3-0.dll" in this.dependencies) {
             this.copy_resources();
         }
     }
