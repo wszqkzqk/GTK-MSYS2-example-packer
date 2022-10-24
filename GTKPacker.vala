@@ -8,13 +8,12 @@ public class GtkPacker : Object {
     string outdir;
     string mingw_path = null;
     Regex quote_regex = /(".*")|('.*')/;
-    Regex msys2_dep_regex;
+    Regex msys2_dep_regex = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;
     Gee.HashSet<string> dependencies = new Gee.HashSet<string>();
 
     public GtkPacker(string file_path, string outdir) {
         this.file_path = this.clean_path(file_path);
-        this.outdir = outdir;
-        this.msys2_dep_regex = new Regex(@".*(/|\\\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(/|\\\\)");
+        this.outdir = this.clean_path(outdir);
     }
 
     string clean_path(string path) {
@@ -117,7 +116,7 @@ public class GtkPacker : Object {
     }
 }
 
-int main(string[] args) {
+static int main(string[] args) {
     string file_path;
     string outdir;
 
