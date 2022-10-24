@@ -83,30 +83,37 @@ public class GtkPacker : Object {
     }
 
     void copy_resources() {
-        var copy_resource_dic = new Gee.HashMap<string, string>();
-        copy_resource_dic[Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, "share", "themes", "default", "gtk-3.0")]
-        = Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, "share", "themes", "default", "gtk-3.0");
-        copy_resource_dic[Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, "share", "themes", "emacs", "gtk-3.0")]
-        = Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, "share", "themes", "emacs", "gtk-3.0");
-        copy_resource_dic[Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, "share", "glib-2.0", "schemas")]
-        = Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, "share", "glib-2.0", "schemas");
-        copy_resource_dic[Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, "share", "icons")]
-        = Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, "share", "icons");
-        copy_resource_dic[Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, "lib", "gdk-pixbuf-2.0")]
-        = Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, "lib", "gdk-pixbuf-2.0");
+        var themes = new List<string>();
+        var libs = new List<string>();
+        themes.append(Path.build_path(Path.DIR_SEPARATOR_S, "share", "themes", "default", "gtk-3.0"));
+        themes.append(Path.build_path(Path.DIR_SEPARATOR_S, "share", "themes", "emacs", "gtk-3.0"));
+        themes.append(Path.build_path(Path.DIR_SEPARATOR_S, "share", "glib-2.0", "schemas"));
+        themes.append(Path.build_path(Path.DIR_SEPARATOR_S, "share", "icons"));
+        libs.append(Path.build_path(Path.DIR_SEPARATOR_S, "lib", "gdk-pixbuf-2.0"));
 
-        foreach (var items in copy_resource_dic) {
-            var resource = File.new_for_path(items.key);
-            var target = File.new_for_path(items.value);
-            this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+        if ("libgtk-3-0.dll" in this.dependencies) {
+            foreach (var item in themes) {
+                var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
+                var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
+                this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+            }
+            foreach (var item in libs) {
+                var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
+                var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
+                this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+            }
+        } else if ("libgtk-4-1.dll" in this.dependencies) {
+            foreach (var item in libs) {
+                var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
+                var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
+                this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+            }
         }
     }
 
     public void run() {
         this.copy_bin_files();
-        if ("libgtk-3-0.dll" in this.dependencies) {
-            this.copy_resources();
-        }
+        this.copy_resources();
     }
 }
 
@@ -142,6 +149,5 @@ int main(string[] args) {
 
     var packer = new GtkPacker(file_path, outdir);
     packer.run();
-
     return 0;
 }
