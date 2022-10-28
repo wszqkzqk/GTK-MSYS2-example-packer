@@ -12,7 +12,7 @@ class GtkPacker():
         self.mingw_arch = mingw_arch
         self.mingw_path = os.path.join(msys2_path, mingw_arch)
         self.quote_regex = re.compile(r"""(".*")|('.*')""")
-        self.msys2_dep_regex = re.compile(r".*(/|\\)"f"(usr|{mingw_arch})"r"(/|\\).*")  # Python会自动拼接仅以空白符号分隔的字符串
+        self.msys2_dep_regex = re.compile(rf".*(/|\\)(usr|{mingw_arch})(/|\\).*")  # Python会自动拼接仅以空白符号分隔的字符串
         self.exe_file_path = self.clean_path(exe_file_path)
         self.outdir = outdir
 

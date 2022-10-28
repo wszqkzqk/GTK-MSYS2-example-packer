@@ -27,7 +27,7 @@ def pathed(path):
 
 info = [i.split() for i in os.popen(f'ntldd -R "{pathed(path)}"')]
 dependencies = set()
-regex = re.compile(r".*(/|\\)"f"(usr|{MINGW_ARCH})"r"(/|\\).*") # 既想使用原意字符串又需要槽传递值的一个办法，Python会自动拼接
+regex = re.compile(rf".*(/|\\)(usr|{MINGW_ARCH})(/|\\).*") # 既想使用原意字符串又需要槽传递值的一个办法，Python会自动拼接
 if not os.path.exists(os.path.join(outdir, "bin")):
     os.makedirs(os.path.join(outdir, "bin"))
 for item in info:
