@@ -7,17 +7,17 @@ public class GtkPacker : Object {
     string file_path;
     string outdir;
     string mingw_path = null;
-    Regex quote_regex = /(".*")|('.*')/;
-    Regex msys2_dep_regex = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;
+    static Regex quote_regex = /(".*")|('.*')/;
+    static Regex msys2_dep_regex = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;
     Gee.HashSet<string> dependencies = new Gee.HashSet<string>();
 
     public GtkPacker(string file_path, string outdir) {
-        this.file_path = this.clean_path(file_path);
-        this.outdir = this.clean_path(outdir);
+        this.file_path = clean_path(file_path);
+        this.outdir = clean_path(outdir);
     }
 
-    string clean_path(string path) {
-        if (this.quote_regex.match(path)) {
+    static inline string clean_path(string path) {
+        if (quote_regex.match(path)) {
             return path[1:path.length-1];
         } else {
             return path;
@@ -37,16 +37,16 @@ public class GtkPacker : Object {
         
         var deps_info_array = deps_info.split("\n");
         foreach (var i in deps_info_array) {
-            var j = i._strip();
+            var j = i.strip();
             var item = j.split(" ");
             if ((item.length == 4) && (!(item[0] in this.dependencies))) {
                 bool condition;
                 if (this.mingw_path == null) {
                     MatchInfo match_info;
-                    condition = this.msys2_dep_regex.match(item[2], 0, out match_info);
+                    condition = msys2_dep_regex.match(item[2], 0, out match_info);
                     this.mingw_path = match_info.fetch(0);
                 } else {
-                    condition = this.msys2_dep_regex.match(item[2]);
+                    condition = msys2_dep_regex.match(item[2]);
                 }
                 if (condition) {
                     this.dependencies.add(item[0]);
@@ -58,7 +58,7 @@ public class GtkPacker : Object {
         }
     }
 
-    bool copy_recursive (File src, File dest, FileCopyFlags flags = FileCopyFlags.NONE, Cancellable? cancellable = null) throws Error {
+    static unowned bool copy_recursive (File src, File dest, FileCopyFlags flags = FileCopyFlags.NONE, Cancellable? cancellable = null) throws Error {
         FileType src_type = src.query_file_type (FileQueryInfoFlags.NONE, cancellable);
         if ( src_type == FileType.DIRECTORY ) {
             string src_path = src.get_path ();
@@ -94,18 +94,18 @@ public class GtkPacker : Object {
             foreach (var item in themes) {
                 var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
                 var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
-                this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+                copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
             }
             foreach (var item in libs) {
                 var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
                 var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
-                this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+                copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
             }
         } else if ("libgtk-4-1.dll" in this.dependencies) {
             foreach (var item in libs) {
                 var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
                 var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
-                this.copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+                copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
             }
         }
     }
