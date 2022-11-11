@@ -4,8 +4,8 @@
 // LGPL v2.1
 
 public class GtkPacker : Object {
-    public string file_path {get;set;}
-    public string outdir {get;set;}
+    public string file_path;
+    public string outdir;
     string mingw_path = null;
     static Regex quote_regex {get; default = /(".*")|('.*')/;}
     static Regex msys2_dep_regex {get; default = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;}
@@ -17,11 +17,7 @@ public class GtkPacker : Object {
     }
 
     static inline string clean_path (string path) {
-        if (quote_regex.match (path)) {
-            return path[1:path.length-1];
-        } else {
-            return path;
-        }
+        return (quote_regex.match (path)) ? path[1:path.length-1] : path;
     }
 
     void copy_bin_files () {
@@ -110,10 +106,18 @@ static int main (string[] args) {
 
     Intl.setlocale ();
     if (args.length == 1) {
-        print("请输入文件地址：\n");
+        print ("请输入文件地址：\n");
         file_path = stdin.read_line ();
+        while ((!FileUtils.test (file_path, FileTest.IS_REGULAR)) || (!file_path.has_suffix (".exe"))) {
+            print ("文件路径错误或后缀名不受支持！请重新输入文件地址：\n");
+            file_path = stdin.read_line ();
+        }
         print("请输入需要将目标文件复制到的文件夹地址:\n");
         outdir = stdin.read_line ();
+        while (outdir == "") {
+            print ("输入为空！请重新输入需要将目标文件复制到的文件夹地址:\n");
+            outdir = stdin.read_line ();
+        }
     } else if (args.length == 2) {
         if (args[1] == "-h" || args[1] == "--help") {
             print ( "GTK程序打包器使用帮助：\n" +
@@ -122,12 +126,18 @@ static int main (string[] args) {
             return 0;
         } else {
             file_path = args[1];
-            print ("请输入需要将目标文件复制到的文件夹地址:\n");
+            print("请输入需要将目标文件复制到的文件夹地址:\n");
             outdir = stdin.read_line ();
+            while (outdir == "") {
+                print ("输入为空！请重新输入需要将目标文件复制到的文件夹地址:\n");
+                outdir = stdin.read_line ();
+            }
         }
     } else if (args.length == 3) {
         file_path = args[1];
         outdir = args[2];
+        assert ((FileUtils.test (file_path, FileTest.IS_REGULAR)) && (file_path.has_suffix (".exe")));
+        assert (outdir == "");
     } else {
         print ("错误！参数过多！\n");
         return 1;
