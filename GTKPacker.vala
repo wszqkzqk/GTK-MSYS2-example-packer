@@ -60,21 +60,21 @@ public class GtkPacker : Object {
 
     static unowned bool copy_recursive (File src, File dest, FileCopyFlags flags = FileCopyFlags.NONE, Cancellable? cancellable = null) throws Error {
         FileType src_type = src.query_file_type (FileQueryInfoFlags.NONE, cancellable);
-        if ( src_type == FileType.DIRECTORY ) {
+        if (src_type == FileType.DIRECTORY) {
             string src_path = src.get_path ();
             string dest_path = dest.get_path ();
             DirUtils.create_with_parents(dest_path, 644);
             src.copy_attributes (dest, flags, cancellable);
         
             FileEnumerator enumerator = src.enumerate_children (FileAttribute.STANDARD_NAME, FileQueryInfoFlags.NONE, cancellable);
-            for ( FileInfo? info = enumerator.next_file (cancellable) ; info != null ; info = enumerator.next_file (cancellable) ) {
+            for (FileInfo? info = enumerator.next_file (cancellable) ; info != null ; info = enumerator.next_file (cancellable)) {
                 copy_recursive (
                 File.new_for_path (Path.build_filename (src_path, info.get_name ())),
                 File.new_for_path (Path.build_filename (dest_path, info.get_name ())),
                 flags,
                 cancellable);
             }
-        } else if ( src_type == FileType.REGULAR ) {
+        } else if (src_type == FileType.REGULAR) {
             src.copy (dest, flags, cancellable);
         }
       
