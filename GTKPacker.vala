@@ -90,22 +90,16 @@ public class GtkPacker : Object {
         themes.append(Path.build_path(Path.DIR_SEPARATOR_S, "share", "icons"));
         libs.append(Path.build_path(Path.DIR_SEPARATOR_S, "lib", "gdk-pixbuf-2.0"));
 
-        if ("libgtk-3-0.dll" in this.dependencies) {
+        if ("libgtk-3-0.dll" in this.dependencies || "libgtk-4-1.dll" in this.dependencies) {
             foreach (var item in themes) {
-                var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
-                var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
-                copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+                var resource = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
+                var target = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
+                copy_recursive (resource, target, FileCopyFlags.OVERWRITE);
             }
             foreach (var item in libs) {
-                var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
-                var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
-                copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
-            }
-        } else if ("libgtk-4-1.dll" in this.dependencies) {
-            foreach (var item in libs) {
-                var resource = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
-                var target = File.new_for_path(Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
-                copy_recursive(resource, target, FileCopyFlags.OVERWRITE);
+                var resource = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
+                var target = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
+                copy_recursive (resource, target, FileCopyFlags.OVERWRITE);
             }
         }
     }
