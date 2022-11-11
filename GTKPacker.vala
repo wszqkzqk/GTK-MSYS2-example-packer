@@ -137,7 +137,7 @@ static int main (string[] args) {
         file_path = args[1];
         outdir = args[2];
         assert ((FileUtils.test (file_path, FileTest.IS_REGULAR)) && (file_path.has_suffix (".exe")));
-        assert (outdir == "");
+        assert (outdir != "");
     } else {
         print ("错误！参数过多！\n");
         return 1;
