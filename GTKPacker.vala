@@ -141,11 +141,11 @@ static int main (string[] args) {
     }
 
     while (quote_regex.match (file_path)) {
-        file_path = file_path[1:file_path.length];
+        file_path = file_path[1:file_path.length-1];
     }
 
     while (quote_regex.match (outdir)) {
-        outdir = outdir[1:outdir.length];
+        outdir = outdir[1:outdir.length-1];
     }
 
     var packer = new GtkPacker (file_path, outdir);
