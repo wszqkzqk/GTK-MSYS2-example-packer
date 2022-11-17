@@ -7,17 +7,12 @@ public class GtkPacker : Object {
     public string file_path;
     public string outdir;
     string mingw_path = null;
-    static Regex quote_regex {get; default = /(".*")|('.*')/;}
     static Regex msys2_dep_regex {get; default = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;}
     Gee.HashSet<string> dependencies = new Gee.HashSet<string> ();
 
     public GtkPacker (string file_path, string outdir) {
-        this.file_path = clean_path (file_path);
-        this.outdir = clean_path (outdir);
-    }
-
-    static inline string clean_path (string path) {
-        return (quote_regex.match (path)) ? path[1:path.length-1] : path;
+        this.file_path = file_path;
+        this.outdir = outdir;
     }
 
     void copy_bin_files () {
@@ -104,6 +99,7 @@ public class GtkPacker : Object {
 static int main (string[] args) {
     string file_path;
     string outdir;
+    var quote_regex = /(".*")|('.*')/;
 
     Intl.setlocale ();
     if (args.length == 1) {
@@ -142,6 +138,14 @@ static int main (string[] args) {
     } else {
         print ("错误！参数过多！\n");
         return 1;
+    }
+
+    while (quote_regex.match (file_path)) {
+        file_path = file_path[1:file_path.length];
+    }
+
+    while (quote_regex.match (outdir)) {
+        outdir = outdir[1:outdir.length];
     }
 
     var packer = new GtkPacker (file_path, outdir);
