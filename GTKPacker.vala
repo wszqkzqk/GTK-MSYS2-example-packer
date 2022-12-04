@@ -1,4 +1,4 @@
-#!/usr/bin/env -S vala --pkg=gee-0.8 --pkg=gio-2.0 -X -O2 -X -march=native -X -pipe
+#!/usr/bin/env -S vala --pkg=gio-2.0 -X -O2 -X -march=native -X -pipe
 
 // 在Windows下打包MSYS2中的GTK程序
 // LGPL v2.1
@@ -8,7 +8,7 @@ public class GtkPacker : Object {
     public string outdir;
     string mingw_path = null;
     static Regex msys2_dep_regex {get; default = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;}
-    Gee.HashSet<string> dependencies = new Gee.HashSet<string> ();
+    GenericSet<string> dependencies = new GenericSet<string> (str_hash, str_equal);
 
     public GtkPacker (string file_path, string outdir) {
         this.file_path = file_path;
@@ -20,7 +20,7 @@ public class GtkPacker : Object {
 
         Process.spawn_command_line_sync (@"ntldd -R '$(this.file_path)'", out deps_info);
         var bin_path = Path.build_path (Path.DIR_SEPARATOR_S, this.outdir, "bin");
-        DirUtils.create_with_parents (bin_path, 644);
+        DirUtils.create_with_parents (bin_path, 0644);
         
         var file = File.new_for_path (this.file_path);
         var target = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S, bin_path, file.get_basename ()));
@@ -28,8 +28,7 @@ public class GtkPacker : Object {
         
         var deps_info_array = deps_info.split ("\n");
         foreach (var i in deps_info_array) {
-            var j = i.strip ();
-            var item = j.split (" ");
+            var item = (i.strip ()).split (" ");
             if ((item.length == 4) && (!(item[0] in this.dependencies))) {
                 bool condition;
                 if (this.mingw_path == null) {
@@ -51,28 +50,28 @@ public class GtkPacker : Object {
 
     static bool copy_recursive (File src, File dest, FileCopyFlags flags = FileCopyFlags.NONE, Cancellable? cancellable = null) throws Error {
         FileType src_type = src.query_file_type (FileQueryInfoFlags.NONE, cancellable);
-        if ( src_type == FileType.DIRECTORY ) {
+        if (src_type == FileType.DIRECTORY) {
             string src_path = src.get_path ();
             string dest_path = dest.get_path ();
-            DirUtils.create_with_parents(dest_path, 644);
+            DirUtils.create_with_parents(dest_path, 0644);
             src.copy_attributes (dest, flags, cancellable);
         
             FileEnumerator enumerator = src.enumerate_children (FileAttribute.STANDARD_NAME, FileQueryInfoFlags.NONE, cancellable);
-            for ( FileInfo? info = enumerator.next_file (cancellable) ; info != null ; info = enumerator.next_file (cancellable) ) {
+            for (FileInfo? info = enumerator.next_file (cancellable) ; info != null ; info = enumerator.next_file (cancellable)) {
                 copy_recursive (
                 File.new_for_path (Path.build_filename (src_path, info.get_name ())),
                 File.new_for_path (Path.build_filename (dest_path, info.get_name ())),
                 flags,
                 cancellable);
             }
-        } else if ( src_type == FileType.REGULAR ) {
+        } else if (src_type == FileType.REGULAR) {
             src.copy (dest, flags, cancellable);
         }
       
         return true;
     }
 
-    void copy_resources() {
+    inline void copy_resources() {
         string[] resources = {
             Path.build_path (Path.DIR_SEPARATOR_S, "share", "themes", "default", "gtk-3.0"),
             Path.build_path (Path.DIR_SEPARATOR_S, "share", "themes", "emacs", "gtk-3.0"),
@@ -90,7 +89,7 @@ public class GtkPacker : Object {
         }
     }
 
-    public void run () {
+    public inline void run () {
         this.copy_bin_files ();
         this.copy_resources ();
     }
