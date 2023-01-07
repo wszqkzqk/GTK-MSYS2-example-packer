@@ -1,13 +1,35 @@
 #!/usr/bin/env -S vala --pkg=gio-2.0 -X -O2 -X -march=native -X -pipe
 
-// 在Windows下打包MSYS2中的GTK程序
-// LGPL v2.1
+/* gtkpacker.vala
+ *
+ * Copyright (C) 2022-2023 周 乾康
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+ *
+ * Author:
+ * 	周 乾康 <wszqkzqk@stu.pku.edu.cn>
+ */
+ 
 public class GtkPacker : Object {
     public string file_path;
     public string outdir;
     string mingw_path = null;
-    static Regex msys2_dep_regex {get; default = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;}
+    static Regex msys2_dep_regex {
+        get;
+        default = /.*(\/|\\)(usr|ucrt64|clang64|mingw64|mingw32|clang32|clangarm64)(\/|\\)/;
+    }
     GenericSet<string> dependencies = new GenericSet<string> (str_hash, str_equal);
 
     public GtkPacker (string file_path, string outdir) {
@@ -15,7 +37,7 @@ public class GtkPacker : Object {
         this.outdir = outdir;
     }
 
-    void copy_bin_files () {
+    void copy_bin_files () throws Error {
         string deps_info;
 
         Process.spawn_command_line_sync (@"ntldd -R '$(this.file_path)'", out deps_info);
@@ -71,7 +93,7 @@ public class GtkPacker : Object {
         return true;
     }
 
-    inline void copy_resources() {
+    inline void copy_resources () throws Error {
         string[] resources = {
             Path.build_path (Path.DIR_SEPARATOR_S, "share", "themes", "default", "gtk-3.0"),
             Path.build_path (Path.DIR_SEPARATOR_S, "share", "themes", "emacs", "gtk-3.0"),
@@ -89,65 +111,65 @@ public class GtkPacker : Object {
         }
     }
 
-    public inline void run () {
+    public inline void run () throws Error {
         this.copy_bin_files ();
         this.copy_resources ();
     }
 }
 
 static int main (string[] args) {
-    string file_path;
-    string outdir;
-    var quote_regex = /(".*")|('.*')/;
-
     Intl.setlocale ();
-    if (args.length == 1) {
-        print ("请输入文件地址：\n");
-        file_path = stdin.read_line ();
-        while ((!FileUtils.test (file_path, FileTest.IS_REGULAR)) || (!file_path.has_suffix (".exe"))) {
-            print ("文件路径错误或后缀名不受支持！请重新输入文件地址：\n");
-            file_path = stdin.read_line ();
-        }
-        print("请输入需要将目标文件复制到的文件夹地址:\n");
-        outdir = stdin.read_line ();
-        while (outdir == "") {
-            print ("输入为空！请重新输入需要将目标文件复制到的文件夹地址:\n");
-            outdir = stdin.read_line ();
-        }
-    } else if (args.length == 2) {
-        if (args[1] == "-h" || args[1] == "--help") {
-            print ( "GTK程序打包器使用帮助：\n" +
-                    "GtkPacker.exe [待打包文件路径] [需打包到的目标路径]\n" +
-                    "GtkPacker.exe -h(--help)    ----查看帮助\n");
-            return 0;
-        } else {
-            file_path = args[1];
-            print("请输入需要将目标文件复制到的文件夹地址:\n");
-            outdir = stdin.read_line ();
-            while (outdir == "") {
-                print ("输入为空！请重新输入需要将目标文件复制到的文件夹地址:\n");
-                outdir = stdin.read_line ();
-            }
-        }
-    } else if (args.length == 3) {
-        file_path = args[1];
-        outdir = args[2];
-        assert ((FileUtils.test (file_path, FileTest.IS_REGULAR)) && (file_path.has_suffix (".exe")));
-        assert (outdir != "");
-    } else {
-        print ("错误！参数过多！\n");
+
+    string file_path = null;
+    string outdir = null;
+    OptionEntry[] options = {
+        { "file", 'i', OptionFlags.NONE, OptionArg.FILENAME, ref file_path, "The executable file to pack", "FILE" },
+        { "output", 'o', OptionFlags.NONE, OptionArg.FILENAME, ref outdir, "The directory to store packed files", "DIRECTORY" },
+        // list terminator
+        { null }
+    };
+
+    var opt_context = new OptionContext ("- A tool to package GTK programs on Windows");
+    opt_context.set_help_enabled (true);
+    opt_context.add_main_entries (options, null);
+
+    try {
+        opt_context.parse (ref args);
+    } catch (OptionError e) {
+        printerr ("error: %s\n", e.message);
+        print (opt_context.get_help (true, null));
         return 1;
     }
 
-    while (quote_regex.match (file_path)) {
-        file_path = file_path[1:file_path.length-1];
+    if (file_path == null || outdir == null) {
+        if (file_path == null) {
+            printerr ("error: The executable file was not setted!\n");
+        }
+        if (outdir == null) {
+            printerr ("error: The directory to store packed files was not setted!\n");
+        }
+        print (opt_context.get_help (true, null));
+        return 1;
     }
-
-    while (quote_regex.match (outdir)) {
-        outdir = outdir[1:outdir.length-1];
+    if (FileUtils.test (file_path, FileTest.IS_REGULAR)) {
+        if (file_path.has_suffix (".exe")) {
+            var packer = new GtkPacker (file_path, outdir);
+            try {
+                packer.run ();
+            } catch (SpawnError e) {
+                printerr ("error: Please check the installation `ntldd' or your settings about Windows system paths!\n");
+                return 1;
+            } catch (Error e) {
+                printerr ("error: %s\n", e.message);
+                return 1;
+            }
+        } else {
+            printerr ("error: The file extension is not supported!\n");
+            return 1;
+        }
+    } else {
+        printerr ("error: The file path is wrong!\n");
+        return 1;
     }
-
-    var packer = new GtkPacker (file_path, outdir);
-    packer.run ();
     return 0;
 }
