@@ -41,11 +41,11 @@ public class GtkPacker : Object {
         string deps_info;
 
         Process.spawn_command_line_sync (@"ntldd -R '$(this.file_path)'", out deps_info);
-        var bin_path = Path.build_path (Path.DIR_SEPARATOR_S, this.outdir, "bin");
+        var bin_path = build_path (this.outdir, "bin");
         DirUtils.create_with_parents (bin_path, 0644);
         
         var file = File.new_for_path (this.file_path);
-        var target = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S, bin_path, file.get_basename ()));
+        var target = File.new_for_path (build_path (bin_path, file.get_basename ()));
         file.copy (target, FileCopyFlags.OVERWRITE);
         
         var deps_info_array = deps_info.split ("\n");
@@ -63,7 +63,7 @@ public class GtkPacker : Object {
                 if (condition) {
                     this.dependencies.add (item[0]);
                     file = File.new_for_path (item[2]);
-                    target = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, bin_path, item[0]));
+                    target = File.new_for_path (build_path(bin_path, item[0]));
                     file.copy (target, FileCopyFlags.OVERWRITE);
                 }
             }
@@ -95,20 +95,24 @@ public class GtkPacker : Object {
 
     inline void copy_resources () throws Error {
         string[] resources = {
-            Path.build_path (Path.DIR_SEPARATOR_S, "share", "themes", "default", "gtk-3.0"),
-            Path.build_path (Path.DIR_SEPARATOR_S, "share", "themes", "emacs", "gtk-3.0"),
-            Path.build_path (Path.DIR_SEPARATOR_S, "share", "glib-2.0", "schemas"),
-            Path.build_path (Path.DIR_SEPARATOR_S, "share", "icons"),
-            Path.build_path (Path.DIR_SEPARATOR_S, "lib", "gdk-pixbuf-2.0")
+            build_path ("share", "themes", "default", "gtk-3.0"),
+            build_path ("share", "themes", "emacs", "gtk-3.0"),
+            build_path ("share", "glib-2.0", "schemas"),
+            build_path ("share", "icons"),
+            build_path ("lib", "gdk-pixbuf-2.0")
         };
 
         if ("libgtk-3-0.dll" in this.dependencies || "libgtk-4-1.dll" in this.dependencies) {
             foreach (var item in resources) {
-                var resource = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, this.mingw_path, item));
-                var target = File.new_for_path (Path.build_path(Path.DIR_SEPARATOR_S, this.outdir, item));
+                var resource = File.new_for_path (build_path(this.mingw_path, item));
+                var target = File.new_for_path (build_path(this.outdir, item));
                 copy_recursive (resource, target, FileCopyFlags.OVERWRITE);
             }
         }
+    }
+
+    public static inline string build_path (string root, ...) {
+        return Path.build_path (Path.DIR_SEPARATOR_S, root, va_list ());
     }
 
     public inline void run () throws Error {
